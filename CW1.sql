@@ -8,7 +8,7 @@ CREATE TABLE dbo.Users
     Username INT NOT NULL,
     Email INT NOT NULL,
 
-    CONSTRAINT pk_Users PRIMARY KEY (UserNo)
+    CONSTRAINT pk_Users PRIMARY KEY (UserNo), CONSTRAINT PK_FavouriteActivities FOREIGN KEY (Email)
 );
 
 INSERT INTO dbo.Users (UserNo, Username, Email)
@@ -53,16 +53,16 @@ END
 
 CREATE TABLE dbo.FavouriteActivities
 (
-	ProductId INT IDENTITY(1,1) not null,
-	Product_Details VARCHAR (Max) not null,
-	Price FLOAT not null,
+	UserNo INT not null,
+	Activities VARCHAR (Max) not null,
+	FavouriteActivities FLOAT not null,
 	Quantity int not null,
-	CONSTRAINT PK_FavouriteActivities PRIMARY KEY (ProductId)
+	CONSTRAINT PK_FavouriteActivities PRIMARY KEY (UserNo), CONSTRAINT PK_FavouriteActivities PRIMARY KEY (Activities)
 );
 
-INSERT INTO dbo.FavouriteActivities(Product_Details, Price, Quantity)
-VALUES('Pens - Black biro',0.30, 200);
-INSERT INTO dbo.FavouriteActivities(Product_Details, Price, Quantity)
-VALUES('Pens - Green biro',0.30, 200);
-INSERT INTO dbo.FavouriteActivities(Product_Details, Price, Quantity)
-VALUES('Pens - Red biro',0.30, 200);
+INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
+VALUES(1);
+INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
+VALUES(2);
+INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
+VALUES(3);
