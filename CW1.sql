@@ -61,15 +61,69 @@ CREATE TABLE dbo.FavouriteActivities
 (
 	UserNo INT NOT NULL,
 	Activities CHAR(255) NOT NULL,
-        CHECK (Units IN('Backpacking', 'Bike Touring', 'Bird Watching','Camping', 'Cross-country Skiing', 'Fishing', 'Hiking', 'Horse Riding', 'Mountain Bikiing', 'OHV/Off-road Driving', 'Paddle Sports', 'Road Biking', )),  
-	FavouriteActivities FLOAT NOT NULL,
+        CHECK (Units IN('Backpacking', 'Bike Touring', 'Bird Watching','Camping', 'Cross-country Skiing', 'Fishing', 'Hiking', 'Horse Riding', 'Mountain Biking', 'OHV/Off-road Driving', 'Paddle Sports', 'Road Biking', 'Rock Climbing', 'Running', 'Scenic Driving', 'Skiing', 'Snowshoeing', 'Via Ferrata', 'Walking')),  
+	FavouriteActivities BOOLEAN NOT NULL,
 
 	CONSTRAINT PK_FavouriteActivities PRIMARY KEY (UserNo, Activities)
 );
 
 INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
-VALUES(1);
+VALUES
+(1,'Backpacking', 0),
+(1,'Bike Touring', 0),
+(1,'Bird Watching', 0),
+(1,'Camping', 0),
+(1,'Cross-country Skiing', 0),
+(1,'Fishing', 0),
+(1,'Hiking', 0),
+(1,'Horse Riding', 0),
+(1,'Mountain Biking', 0),
+(1,'OHV/Off-road Driving', 0),
+(1,'Paddle Sports', 0),
+(1,'Road Biking', 0),
+(1,'Running', 0),
+(1,'Scenic Driving', 0),
+(1,'Skiing', 0),
+(1,'Snowshoeing', 0),
+(1,'Via Ferrata', 0),
+(1,'Walking', 0);
 INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
-VALUES(2);
+VALUES
+(2,'Backpacking', 0),
+(2,'Bike Touring', 0),
+(2,'Bird Watching', 0),
+(2,'Camping', 0),
+(2,'Cross-country Skiing', 0),
+(2,'Fishing', 0),
+(2,'Hiking', 0),
+(2,'Horse Riding', 0),
+(2,'Mountain Biking', 0),
+(2,'OHV/Off-road Driving', 0),
+(2,'Paddle Sports', 0),
+(2,'Road Biking', 0),
+(2,'Running', 0),
+(2,'Scenic Driving', 0),
+(2,'Skiing', 0),
+(2,'Snowshoeing', 0),
+(2,'Via Ferrata', 0),
+(2,'Walking', 0);
 INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
-VALUES(3);
+VALUES
+(3,'Backpacking', 0),
+(3,'Bike Touring', 0),
+(3,'Bird Watching', 0),
+(3,'Camping', 0),
+(3,'Cross-country Skiing', 0),
+(3,'Fishing', 0),
+(3,'Hiking', 0),
+(3,'Horse Riding', 0),
+(3,'Mountain Biking', 0),
+(3,'OHV/Off-road Driving', 0),
+(3,'Paddle Sports', 0),
+(3,'Road Biking', 0),
+(3,'Running', 0),
+(3,'Scenic Driving', 0),
+(3,'Skiing', 0),
+(3,'Snowshoeing', 0),
+(3,'Via Ferrata', 0),
+(3,'Walking', 0);
