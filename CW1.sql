@@ -5,10 +5,10 @@ END
 CREATE TABLE dbo.Users
 (
     UserNo INT NOT NULL,
-    Username INT NOT NULL,
-    Email INT NOT NULL,
+    Username CHAR(81) NOT NULL,
+    Email VARCHAR(320) NOT NULL,
 
-    CONSTRAINT pk_Users PRIMARY KEY (UserNo), CONSTRAINT PK_FavouriteActivities FOREIGN KEY (Email)
+    CONSTRAINT pk_Users PRIMARY KEY (UserNo, Email)
 );
 
 INSERT INTO dbo.Users (UserNo, Username, Email)
@@ -25,26 +25,31 @@ END
 
 CREATE TABLE dbo.UserData 
 ( 
-    Email INT NOT NULL, 
-    Password INT NOT NULL,     
-    AboutMe INT,
-    MemberLocation INT, 
-    Units INT NOT NULL,     
-    ActivityTimePreference INT NOT NULL,
-    Height INT NOT NULL, 
-    Weight INT NOT NULL,     
-    Birthday INT NOT NULL,
-    MarketingLanguage INT NOT NULL
+    Email VARCHAR(320) NOT NULL, 
+    userPassword VARCHAR(Max) NOT NULL,     
+    AboutMe VARCHAR(720),
+    MemberLocation VARCHAR(Max) NOT NULL, 
+    Units CHAR(255) NOT NULL 
+        CHECK (Units IN('Imperial', 'Metric')),     
+    ActivityTimePreference CHAR(255) NOT NULL
+        CHECK (Units IN('Speed', 'Pace')),  
+    userHeight INT
+        CHECK (100 <= userHeight AND userHeight <= 299), 
+    userWeight INT,
+        CHECK (23 <= userWeight AND userWeight <= 407), 
+    Birthday DATE,
+    MarketingLanguage CHAR(255) NOT NULL
+        CHECK (Units IN('English (US)', 'English(UK)', 'Dansk (Danmark)','Deutsch (Deutschland)', 'Español (España)', 'Español (Latinoamérica)', 'Français (France)', 'Italiano (Italia)', 'Nederlands (Nederland)', 'Norsk bokmål (Norge)', 'Polski (Polska)', 'Português (Brasil)', 'Português (Portugal)', 'Svenska (Sverige)' )),  
 
 CONSTRAINT PK_UserData PRIMARY KEY (Email) 
 ); 
 
-INSERT INTO dbo.UserData(Email, Password, AboutMe, MemberLocation, Units, ActivityTimePreference, Height, Weight, Birthday, MarketingLanguage)
-VALUES('grace@plymouth.ac.uk', 'ISAD123!');
-INSERT INTO dbo.UserData(Email, Password, AboutMe, MemberLocation, Units, ActivityTimePreference, Height, Weight, Birthday, MarketingLanguage)
-VALUES('tim@plymouth.ac.uk', 'COMP200!');
-INSERT INTO dbo.UserData(Email, Password, AboutMe, MemberLocation, Units, ActivityTimePreference, Height, Weight, Birthday, MarketingLanguage)
-VALUES('ada@plymouth.ac.uk', 'insercurePassword');
+INSERT INTO dbo.UserData(Email, userPassword, AboutMe, MemberLocation, Units, ActivityTimePreference, userHeight, userWeight, Birthday, MarketingLanguage)
+VALUES('grace@plymouth.ac.uk', 'ISAD123!', NULL , 'Plymouth, Devon, England', 'Metric', 'Pace', NULL, NULL, NULL, 'English(UK)');
+INSERT INTO dbo.UserData(Email, userPassword, AboutMe, MemberLocation, Units, ActivityTimePreference, userHeight, userWeight, Birthday, MarketingLanguage)
+VALUES('tim@plymouth.ac.uk', 'COMP200!', NULL , 'Plymouth, Devon, England', 'Metric', 'Pace', NULL, NULL, NULL, 'English(UK)');
+INSERT INTO dbo.UserData(Email, userPassword, AboutMe, MemberLocation, Units, ActivityTimePreference, userHeight, userWeight, Birthday, MarketingLanguage)
+VALUES('ada@plymouth.ac.uk', 'insecurePassword', NULL , 'Plymouth, Devon, England', 'Metric', 'Pace', NULL, NULL, NULL, 'English(UK)');
 
 IF OBJECT_ID(N'dbo.FavouriteActivities', N'U') IS NOT NULL 
 BEGIN
@@ -53,11 +58,12 @@ END
 
 CREATE TABLE dbo.FavouriteActivities
 (
-	UserNo INT not null,
-	Activities VARCHAR (Max) not null,
-	FavouriteActivities FLOAT not null,
-	Quantity int not null,
-	CONSTRAINT PK_FavouriteActivities PRIMARY KEY (UserNo), CONSTRAINT PK_FavouriteActivities PRIMARY KEY (Activities)
+	UserNo INT NOT NULL,
+	Activities CHAR(255) NOT NULL,
+        CHECK (Units IN('Backpacking', 'Bike Touring', 'Bird Watching','Camping', 'Cross-country Skiing', 'Fishing', 'Hiking', 'Horse Riding', 'Mountain Bikiing', 'OHV/Off-road Driving', 'Paddle Sports', 'Road Biking', )),  
+	FavouriteActivities FLOAT NOT NULL,
+
+	CONSTRAINT PK_FavouriteActivities PRIMARY KEY (UserNo, Activities)
 );
 
 INSERT INTO dbo.FavouriteActivities(UserNo, Activities, FavouriteActivities)
