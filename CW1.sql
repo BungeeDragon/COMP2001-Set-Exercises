@@ -8,7 +8,8 @@ CREATE TABLE dbo.Users
     Username CHAR(81) NOT NULL,
     Email VARCHAR(320) NOT NULL,
 
-    CONSTRAINT pk_Users PRIMARY KEY (UserNo, Email)
+    CONSTRAINT pk_Users PRIMARY KEY (UserNo),
+    FOREIGN KEY (Email) REFERENCES UserData(Email)
 );
 
 INSERT INTO dbo.Users (UserNo, Username, Email)
