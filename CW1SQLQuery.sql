@@ -2,26 +2,6 @@ IF OBJECT_ID('CW1.[Favourite_Activities]', 'V') IS NOT NULL
     DROP VIEW CW1.[Favourite_Activities];
 GO
 
--- Remove the foreign key constraint in CW1.FavouriteActivities
-IF OBJECT_ID(N'CW1.FavouriteActivities', 'U') IS NOT NULL 
-BEGIN
-    ALTER TABLE CW1.FavouriteActivities
-    DROP CONSTRAINT FK_FavouriteActivities_Users;
-END
-
--- Remove the foreign key constraint in CW1.UserData
-IF OBJECT_ID(N'CW1.UserData', 'U') IS NOT NULL 
-BEGIN
-    ALTER TABLE CW1.UserData
-    DROP CONSTRAINT FK_UserData_Users;
-END
-
--- Drop the Users table if it exists
-IF OBJECT_ID(N'CW1.Users', N'U') IS NOT NULL 
-BEGIN
-    DROP TABLE CW1.Users; 
-END
-
 -- Drop the UsersData table if it exists
 IF OBJECT_ID(N'CW1.UserData', N'U') IS NOT NULL 
 BEGIN
@@ -32,6 +12,12 @@ END
 IF OBJECT_ID(N'CW1.FavouriteActivities', N'U') IS NOT NULL 
 BEGIN
     DROP TABLE CW1.FavouriteActivities; 
+END
+
+-- Drop the Users table if it exists
+IF OBJECT_ID(N'CW1.Users', N'U') IS NOT NULL 
+BEGIN
+    DROP TABLE CW1.Users; 
 END
 
 -- Create Users table
@@ -45,6 +31,7 @@ CREATE TABLE CW1.Users
     CONSTRAINT UQ_Email UNIQUE (Email) -- Assuming Email is unique for each user
 );
 SET IDENTITY_INSERT CW1.Users ON;
+
 
 
 -- Insert into Users table
