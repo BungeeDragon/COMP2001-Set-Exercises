@@ -42,6 +42,7 @@ VALUES (2, 'Tim Berners-Lee', 'tim@plymouth.ac.uk', 'COMP2000!');
 INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
 VALUES (3, 'Ada Lovelace', 'ada@plymouth.ac.uk', 'insecurePassword');
 
+SET IDENTITY_INSERT CW1.Users OFF;
 -- Create UserData table
 CREATE TABLE CW1.UserData 
 ( 
@@ -163,7 +164,97 @@ SELECT u.UserNo, u.Username, fa.Activities
 FROM CW1.Users u
 JOIN CW1.FavouriteActivities fa ON u.UserNo = fa.UserNo
 WHERE fa.FavouriteActivities = 1;
+GO
 
---Triggers
+--Delete Stored Procedures--
 
+-- Drop InsertUser Stored Procedure
+IF OBJECT_ID('CW1.InsertUser', 'P') IS NOT NULL
+    DROP PROCEDURE CW1.InsertUser;
+GO
 
+-- Drop UpdateUser Stored Procedure
+IF OBJECT_ID('CW1.UpdateUser', 'P') IS NOT NULL
+    DROP PROCEDURE CW1.UpdateUser;
+GO
+
+-- Drop DeleteAboutMe Stored Procedure
+IF OBJECT_ID('CW1.DeleteUser', 'P') IS NOT NULL
+    DROP PROCEDURE CW1.DeleteUser;
+GO
+
+--Create Stored Procedures--
+
+--InsertUserStored Procedure
+
+CREATE PROCEDURE CW1.InsertUser
+@Username CHAR(81), 
+@Email VARCHAR(320), 
+@userPassword VARCHAR(Max)
+AS
+BEGIN
+    INSERT INTO CW1.Users (Username, Email, userPassword)
+    VALUES (@Username, @Email, @userPassword);
+
+    DECLARE @UserNo INT;
+    SET @UserNo = SCOPE_IDENTITY(); -- Get the last inserted identity value as the IDENTITY(1,1) data type for UserNo ensures the inserted data has a UserNo we can read with SCOPE_IDENTITY()
+
+    INSERT INTO CW1.UserData (Email)
+    VALUES (@Email);
+
+    INSERT INTO CW1.FavouriteActivities (UserNo, Activities)
+    VALUES 
+    (@UserNo,'Backpacking'),
+    (@UserNo,'Bike Touring'),
+    (@UserNo,'Bird Watching'),
+    (@UserNo,'Camping'),
+    (@UserNo,'Cross-country Skiing'),
+    (@UserNo,'Fishing'),
+    (@UserNo,'Hiking'),
+    (@UserNo,'Horse Riding'),
+    (@UserNo,'Mountain Biking'),
+    (@UserNo,'OHV/Off-road Driving'),
+    (@UserNo,'Paddle Sports'),
+    (@UserNo,'Road Biking'),
+    (@UserNo,'Running'),
+    (@UserNo,'Scenic Driving'),
+    (@UserNo,'Skiing'),
+    (@UserNo,'Snowshoeing'),
+    (@UserNo,'Via Ferrata'),
+    (@UserNo,'Walking');
+END;
+GO
+
+--UpdateUser Stored Procedure
+
+CREATE PROCEDURE CW1.UpdateUser
+@UserNo INT,
+@updatedUsername CHAR(81) = NULL, -- = NULL makes these paramaters optional to fill, retaining the original data if nothing is passed through
+@updatedUserPassword VARCHAR(Max) = NULL,
+@updatedEmail VARCHAR(320) = NULL
+
+AS
+BEGIN
+    UPDATE CW1.Users
+    SET Username = @updatedUsername,
+        userPassword = @updatedUserPassword,
+        Email = @updatedEmail
+    WHERE UserNo = @UserNo;
+END;
+GO
+
+--RemoveUser Stored Procedure
+
+CREATE PROCEDURE CW1.DeleteUser
+    @UserNo INT
+AS
+BEGIN
+    DELETE FROM CW1.FavouriteActivities
+    WHERE UserNo = @UserNo;
+
+    DELETE FROM CW1.UserData
+    WHERE Email IN (SELECT Email FROM CW1.Users WHERE UserNo = @UserNo);
+
+    DELETE FROM CW1.Users
+    WHERE UserNo = @UserNo;
+END;
