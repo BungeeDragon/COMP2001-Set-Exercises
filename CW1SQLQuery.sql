@@ -50,11 +50,11 @@ CREATE TABLE CW1.UserData
     AboutMe VARCHAR(720) DEFAULT NULL,
     MemberLocation VARCHAR(Max) NOT NULL DEFAULT 'Plymouth, Devon, England', 
     Units CHAR(255) NOT NULL DEFAULT 'Metric'
-        CHECK (Units IN('Imperial', 'Metric')),     
+        CHECK (Units IN('Imperial', 'Metric')),
     ActivityTimePreference CHAR(255) NOT NULL DEFAULT 'Pace'
         CHECK (ActivityTimePreference IN('Speed', 'Pace')),
-    userHeight INT DEFAULT NULL
-        CHECK (100 <= userHeight AND userHeight <= 299), 
+    userHeightCm INT DEFAULT NULL
+        CHECK (100 <= userHeightCm AND userHeightCm <= 299), 
     userWeight INT DEFAULT NULL
         CHECK (23 <= userWeight AND userWeight <= 407), 
     Birthday DATE DEFAULT NULL,
@@ -185,7 +185,7 @@ GO
 
 --Create Stored Procedures--
 
---InsertUserStored Procedure
+--InsertUser Stored Procedure
 
 CREATE PROCEDURE CW1.InsertUser
 @Username CHAR(81), 
@@ -229,9 +229,9 @@ GO
 
 CREATE PROCEDURE CW1.UpdateUser
 @UserNo INT,
-@updatedUsername CHAR(81) = NULL, -- = NULL makes these paramaters optional to fill, retaining the original data if nothing is passed through
-@updatedUserPassword VARCHAR(Max) = NULL,
-@updatedEmail VARCHAR(320) = NULL
+@updatedUsername CHAR(81), -- = NULL makes these paramaters optional to fill, retaining the original data if nothing is passed through
+@updatedUserPassword VARCHAR(Max),
+@updatedEmail VARCHAR(320)
 
 AS
 BEGIN
@@ -258,3 +258,9 @@ BEGIN
     DELETE FROM CW1.Users
     WHERE UserNo = @UserNo;
 END;
+
+--Trigger--
+
+
+
+
