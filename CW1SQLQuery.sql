@@ -34,7 +34,7 @@ CREATE TABLE CW1.Users
 SET IDENTITY_INSERT CW1.Users ON;
 
 
--- Insert into Users table
+-- Insert into Users table sample data
 INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
 VALUES (1, 'Grace Hopper', 'grace@plymouth.ac.uk', 'ISAD123!');
 INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
@@ -42,7 +42,6 @@ VALUES (2, 'Tim Berners-Lee', 'tim@plymouth.ac.uk', 'COMP2000!');
 INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
 VALUES (3, 'Ada Lovelace', 'ada@plymouth.ac.uk', 'insecurePassword');
 
-SET IDENTITY_INSERT CW1.Users OFF;
 -- Create UserData table
 CREATE TABLE CW1.UserData 
 ( 
@@ -53,8 +52,8 @@ CREATE TABLE CW1.UserData
         CHECK (Units IN('Imperial', 'Metric')),
     ActivityTimePreference CHAR(255) NOT NULL DEFAULT 'Pace'
         CHECK (ActivityTimePreference IN('Speed', 'Pace')),
-    userHeightCm INT DEFAULT NULL
-        CHECK (100 <= userHeightCm AND userHeightCm <= 299), 
+    userHeight INT DEFAULT NULL
+        CHECK (100 <= userHeight AND userHeight <= 299), 
     userWeight INT DEFAULT NULL
         CHECK (23 <= userWeight AND userWeight <= 407), 
     Birthday DATE DEFAULT NULL,
@@ -66,7 +65,7 @@ CREATE TABLE CW1.UserData
 ); 
 
 
--- Insert into UserData table
+-- Insert into UserData table sample data
 INSERT INTO CW1.UserData(Email)
 VALUES('grace@plymouth.ac.uk');
 INSERT INTO CW1.UserData(Email)
@@ -89,7 +88,7 @@ CREATE TABLE CW1.FavouriteActivities
 );
 
 
--- Insert into FavouriteActivities table
+-- Insert into FavouriteActivities table sample data
 INSERT INTO CW1.FavouriteActivities(UserNo, Activities, FavouriteActivities)
 VALUES
 (1,'Backpacking', 0),
@@ -149,10 +148,6 @@ VALUES
 (3,'Via Ferrata', 0),
 (3,'Walking', 0);
 
---Index
-
-CREATE INDEX IX_UserNo_Email ON CW1.Users (UserNo, Email);
-
 -- View
 
 IF OBJECT_ID('CW1.[Favourite_Activities]', 'V') IS NOT NULL
@@ -185,19 +180,21 @@ GO
 
 --Create Stored Procedures--
 
---InsertUser Stored Procedure
+-- InsertUser Stored Procedure
 
 CREATE PROCEDURE CW1.InsertUser
 @Username CHAR(81), 
 @Email VARCHAR(320), 
-@userPassword VARCHAR(Max)
+@Password VARCHAR(Max)
 AS
 BEGIN
+    SET IDENTITY_INSERT CW1.Users OFF;
+
     INSERT INTO CW1.Users (Username, Email, userPassword)
-    VALUES (@Username, @Email, @userPassword);
+    VALUES (@Username, @Email, @Password);
 
     DECLARE @UserNo INT;
-    SET @UserNo = SCOPE_IDENTITY(); -- Get the last inserted identity value as the IDENTITY(1,1) data type for UserNo ensures the inserted data has a UserNo we can read with SCOPE_IDENTITY()
+    SET @UserNo = SCOPE_IDENTITY();
 
     INSERT INTO CW1.UserData (Email)
     VALUES (@Email);
@@ -225,25 +222,33 @@ BEGIN
 END;
 GO
 
---UpdateUser Stored Procedure
+-- UpdateUser Stored Procedure
 
 CREATE PROCEDURE CW1.UpdateUser
 @UserNo INT,
-@updatedUsername CHAR(81), -- = NULL makes these paramaters optional to fill, retaining the original data if nothing is passed through
-@updatedUserPassword VARCHAR(Max),
-@updatedEmail VARCHAR(320)
+@newUsername CHAR(81), 
+@newPassword VARCHAR(Max),
+@newEmail VARCHAR(320)
 
 AS
 BEGIN
-    UPDATE CW1.Users
-    SET Username = @updatedUsername,
-        userPassword = @updatedUserPassword,
-        Email = @updatedEmail
-    WHERE UserNo = @UserNo;
+        -- Update UserData table
+        UPDATE CW1.UserData
+        SET Email = @newEmail
+        WHERE Email = (SELECT Email FROM CW1.Users WHERE UserNo = @UserNo);
+        
+        -- Update Users table
+        UPDATE CW1.Users
+        SET Username = @newUsername,
+            userPassword = @newPassword,
+            Email = @newEmail
+        WHERE UserNo = @UserNo;
+
 END;
 GO
 
---RemoveUser Stored Procedure
+
+--DeleteUser Stored Procedure
 
 CREATE PROCEDURE CW1.DeleteUser
     @UserNo INT
@@ -257,6 +262,16 @@ BEGIN
 
     DELETE FROM CW1.Users
     WHERE UserNo = @UserNo;
+END;
+GO
+
+--updateUnit Stored Procedure to activate trigger
+CREATE PROCEDURE CW1.updateUnit
+    @Unit CHAR(255) NOT NULL
+AS
+BEGIN
+    UPDATE CW1.UserData
+    SET Units = @Unit
 END;
 
 --Trigger--
