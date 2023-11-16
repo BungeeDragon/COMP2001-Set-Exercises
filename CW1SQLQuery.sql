@@ -24,6 +24,7 @@ END
 CREATE TABLE CW1.Users
 (
     UserNo INT NOT NULL IDENTITY(1,1),
+    userStatus CHAR(255) NOT NULL,
     Username CHAR(81) NOT NULL,
     Email VARCHAR(320) NOT NULL,
     userPassword VARCHAR(Max) NOT NULL, 
@@ -35,12 +36,14 @@ SET IDENTITY_INSERT CW1.Users ON;
 
 
 -- Insert into Users table sample data
-INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
-VALUES (1, 'Grace Hopper', 'grace@plymouth.ac.uk', 'ISAD123!');
-INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
-VALUES (2, 'Tim Berners-Lee', 'tim@plymouth.ac.uk', 'COMP2000!');
-INSERT INTO CW1.Users (UserNo, Username, Email, userPassword)
-VALUES (3, 'Ada Lovelace', 'ada@plymouth.ac.uk', 'insecurePassword');
+INSERT INTO CW1.Users (UserNo, userStatus, Username, Email, userPassword)
+VALUES (1, 'Active', 'Grace Hopper', 'grace@plymouth.ac.uk', 'ISAD123!');
+INSERT INTO CW1.Users (UserNo, userStatus, Username, Email, userPassword)
+VALUES (2, 'Active', 'Tim Berners-Lee', 'tim@plymouth.ac.uk', 'COMP2000!');
+INSERT INTO CW1.Users (UserNo, userStatus, Username, Email, userPassword)
+VALUES (3, 'Active', 'Ada Lovelace', 'ada@plymouth.ac.uk', 'insecurePassword');
+
+
 
 -- Create UserData table
 CREATE TABLE CW1.UserData 
@@ -178,6 +181,10 @@ IF OBJECT_ID('CW1.DeleteUser', 'P') IS NOT NULL
     DROP PROCEDURE CW1.DeleteUser;
 GO
 
+IF OBJECT_ID('CW1.updateUnit', 'P') IS NOT NULL
+    DROP PROCEDURE CW1.updateUnit;
+GO
+
 --Create Stored Procedures--
 
 -- InsertUser Stored Procedure
@@ -190,8 +197,8 @@ AS
 BEGIN
     SET IDENTITY_INSERT CW1.Users OFF;
 
-    INSERT INTO CW1.Users (Username, Email, userPassword)
-    VALUES (@Username, @Email, @Password);
+    INSERT INTO CW1.Users (userStatus, Username, Email, userPassword)
+    VALUES ('Active', @Username, @Email, @Password);
 
     DECLARE @UserNo INT;
     SET @UserNo = SCOPE_IDENTITY();
@@ -222,30 +229,43 @@ BEGIN
 END;
 GO
 
--- UpdateUser Stored Procedure
 
 CREATE PROCEDURE CW1.UpdateUser
-@UserNo INT,
+@Email VARCHAR(320),
+@Password VARCHAR(Max),
+@newEmail VARCHAR(320),
 @newUsername CHAR(81), 
-@newPassword VARCHAR(Max),
-@newEmail VARCHAR(320)
+@newPassword VARCHAR(Max)
 
 AS
 BEGIN
+        -- Check if the email and password are correct
+        IF EXISTS (
+            SELECT 1
+            FROM CW1.Users
+            WHERE Email = @Email AND userPassword = @Password
+        )
+        -- Disable the foreign key constraint
+        ALTER TABLE CW1.UserData NOCHECK CONSTRAINT FK_UserData_Users;
+
         -- Update UserData table
         UPDATE CW1.UserData
         SET Email = @newEmail
-        WHERE Email = (SELECT Email FROM CW1.Users WHERE UserNo = @UserNo);
+        WHERE Email = @Email;
         
         -- Update Users table
         UPDATE CW1.Users
         SET Username = @newUsername,
             userPassword = @newPassword,
             Email = @newEmail
-        WHERE UserNo = @UserNo;
+        WHERE Email = @Email;
+
+        -- Re-enable the foreign key constraint
+        ALTER TABLE CW1.UserData WITH CHECK CHECK CONSTRAINT FK_UserData_Users;
 
 END;
 GO
+
 
 
 --DeleteUser Stored Procedure
@@ -254,20 +274,15 @@ CREATE PROCEDURE CW1.DeleteUser
     @UserNo INT
 AS
 BEGIN
-    DELETE FROM CW1.FavouriteActivities
-    WHERE UserNo = @UserNo;
-
-    DELETE FROM CW1.UserData
-    WHERE Email IN (SELECT Email FROM CW1.Users WHERE UserNo = @UserNo);
-
-    DELETE FROM CW1.Users
+    UPDATE CW1.Users
+    SET userStatus = 'Archived'
     WHERE UserNo = @UserNo;
 END;
 GO
 
 --updateUnit Stored Procedure to activate trigger
 CREATE PROCEDURE CW1.updateUnit
-    @Unit CHAR(255) NOT NULL
+    @Unit CHAR(255)
 AS
 BEGIN
     UPDATE CW1.UserData
