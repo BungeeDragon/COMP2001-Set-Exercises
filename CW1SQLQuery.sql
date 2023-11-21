@@ -50,17 +50,15 @@ CREATE TABLE CW1.UserData
 ( 
     Email VARCHAR(320) NOT NULL,   
     AboutMe VARCHAR(720) DEFAULT NULL,
-    MemberLocation VARCHAR(Max) NOT NULL DEFAULT 'Plymouth, Devon, England', 
-    Units CHAR(255) NOT NULL DEFAULT 'Metric'
+    MemberLocation VARCHAR(Max)  DEFAULT 'Plymouth, Devon, England', 
+    Units CHAR(255) DEFAULT 'Metric'
         CHECK (Units IN('Imperial', 'Metric')),
-    ActivityTimePreference CHAR(255) NOT NULL DEFAULT 'Pace'
+    ActivityTimePreference CHAR(255) DEFAULT 'Pace'
         CHECK (ActivityTimePreference IN('Speed', 'Pace')),
-    userHeight INT DEFAULT NULL
-        CHECK (100 <= userHeight AND userHeight <= 299), 
-    userWeight INT DEFAULT NULL
-        CHECK (23 <= userWeight AND userWeight <= 407), 
+    userHeight DECIMAL(5, 1)  DEFAULT NULL,
+    userWeight INT  DEFAULT NULL,
     Birthday DATE DEFAULT NULL,
-    MarketingLanguage CHAR(255) NOT NULL DEFAULT 'English(UK)'
+    MarketingLanguage CHAR(255) DEFAULT 'English(UK)'
         CHECK (MarketingLanguage IN('English (US)', 'English(UK)', 'Dansk (Danmark)','Deutsch (Deutschland)', 'Español (España)', 'Español (Latinoamérica)', 'Français (France)', 'Italiano (Italia)', 'Nederlands (Nederland)', 'Norsk bokmål (Norge)', 'Polski (Polska)', 'Português (Brasil)', 'Português (Portugal)', 'Svenska (Sverige)' )),  
 
     CONSTRAINT PK_UserData PRIMARY KEY (Email),
@@ -82,9 +80,9 @@ VALUES('ada@plymouth.ac.uk');
 CREATE TABLE CW1.FavouriteActivities
 (
     UserNo INT NOT NULL,
-    Activities CHAR(255) NOT NULL DEFAULT 'Backpacking',
+    Activities CHAR(255) DEFAULT 'Backpacking',
     CHECK (Activities IN('Backpacking', 'Bike Touring', 'Bird Watching','Camping', 'Cross-country Skiing', 'Fishing', 'Hiking', 'Horse Riding', 'Mountain Biking', 'OHV/Off-road Driving', 'Paddle Sports', 'Road Biking', 'Rock Climbing', 'Running', 'Scenic Driving', 'Skiing', 'Snowshoeing', 'Via Ferrata', 'Walking')),  
-    FavouriteActivities BIT NOT NULL DEFAULT 0,
+    FavouriteActivities BIT DEFAULT 0,
     CHECK (FavouriteActivities IN (0, 1)),
     CONSTRAINT PK_FavouriteActivities PRIMARY KEY (UserNo, Activities),
     CONSTRAINT FK_FavouriteActivities_Users FOREIGN KEY (UserNo) REFERENCES CW1.Users (UserNo)
@@ -164,25 +162,26 @@ JOIN CW1.FavouriteActivities fa ON u.UserNo = fa.UserNo
 WHERE fa.FavouriteActivities = 1;
 GO
 
---Delete Stored Procedures--
+--Delete Stored Procedures & Trigger --
 
--- Drop InsertUser Stored Procedure
 IF OBJECT_ID('CW1.InsertUser', 'P') IS NOT NULL
     DROP PROCEDURE CW1.InsertUser;
 GO
 
--- Drop UpdateUser Stored Procedure
 IF OBJECT_ID('CW1.UpdateUser', 'P') IS NOT NULL
     DROP PROCEDURE CW1.UpdateUser;
 GO
 
--- Drop DeleteAboutMe Stored Procedure
 IF OBJECT_ID('CW1.DeleteUser', 'P') IS NOT NULL
     DROP PROCEDURE CW1.DeleteUser;
 GO
 
 IF OBJECT_ID('CW1.updateUnit', 'P') IS NOT NULL
     DROP PROCEDURE CW1.updateUnit;
+GO
+
+IF OBJECT_ID('CW1.convertUnit', 'TR') IS NOT NULL
+    DROP TRIGGER CW1.convertUnit;
 GO
 
 --Create Stored Procedures--
@@ -232,11 +231,18 @@ GO
 
 CREATE PROCEDURE CW1.UpdateUser
 @Email VARCHAR(320),
-@Password VARCHAR(Max),
+@Password VARCHAR(MAX),
 @newEmail VARCHAR(320),
-@newUsername CHAR(81), 
-@newPassword VARCHAR(Max)
-
+@newUsername CHAR(81) = NULL, 
+@newPassword VARCHAR(MAX) = NULL,
+@newAboutMe VARCHAR(720) = NULL,
+@newMemberLocation VARCHAR(MAX) = NULL,
+@newUnits CHAR(255) = NULL,
+@newActivityTimePreference CHAR(255) = NULL,
+@newUserHeight DECIMAL(5, 1)  = NULL,
+@newUserWeight INT  = NULL,
+@newBirthday DATE = NULL,
+@newMarketingLanguage CHAR(255) = NULL
 AS
 BEGIN
         -- Check if the email and password are correct
@@ -250,14 +256,22 @@ BEGIN
 
         -- Update UserData table
         UPDATE CW1.UserData
-        SET Email = @newEmail
+        SET Email = ISNULL(@newEmail, Email), -- Sets the not-null value
+            AboutMe = ISNULL(@newAboutMe, AboutMe),
+            MemberLocation = ISNULL(@newMemberLocation, MemberLocation),
+            Units = ISNULL(@newUnits, Units),
+            ActivityTimePreference = ISNULL(@newActivityTimePreference, ActivityTimePreference),
+            userWeight = ISNULL(@newUserWeight, userWeight),
+            userHeight = ISNULL(@newUserHeight, userHeight),
+            Birthday = ISNULL(@newBirthday, Birthday),
+            MarketingLanguage = ISNULL(@newMarketingLanguage, MarketingLanguage)
         WHERE Email = @Email;
         
         -- Update Users table
         UPDATE CW1.Users
-        SET Username = @newUsername,
-            userPassword = @newPassword,
-            Email = @newEmail
+        SET Username = ISNULL(@newUsername, Username),
+            userPassword = ISNULL(@newPassword, userPassword),
+            Email = ISNULL(@newEmail, Email)
         WHERE Email = @Email;
 
         -- Re-enable the foreign key constraint
@@ -265,8 +279,6 @@ BEGIN
 
 END;
 GO
-
-
 
 --DeleteUser Stored Procedure
 
@@ -280,17 +292,31 @@ BEGIN
 END;
 GO
 
---updateUnit Stored Procedure to activate trigger
-CREATE PROCEDURE CW1.updateUnit
-    @Unit CHAR(255)
-AS
-BEGIN
-    UPDATE CW1.UserData
-    SET Units = @Unit
-END;
-
 --Trigger--
 
+CREATE TRIGGER CW1.convertUnit
+ON CW1.UserData
+AFTER UPDATE
+AS
+BEGIN
+    IF UPDATE(Units) -- Checks if the Units column was updated
+    BEGIN
+        DECLARE @newUnits CHAR(255);
+        SELECT @newUnits = Units FROM INSERTED;
 
+        IF @newUnits = 'Metric'
+        BEGIN
+            UPDATE CW1.UserData
+            SET userHeight = ROUND(userHeight * 0.3048, 0),
+            userWeight = ROUND(userWeight / 2.205, 0);
+        END
 
-
+        IF @newUnits = 'Imperial'
+        BEGIN
+            UPDATE CW1.UserData
+            SET userHeight = ROUND(userHeight / 30.48, 1),
+            userWeight = ROUND(userWeight * 2.205, 0);
+        END
+    END
+END;
+GO
