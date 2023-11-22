@@ -151,11 +151,11 @@ VALUES
 
 -- View
 
-IF OBJECT_ID('CW1.[Favourite_Activities]', 'V') IS NOT NULL
-    DROP VIEW CW1.[Favourite_Activities];
+IF OBJECT_ID('CW1.[FavouriteActivitiesView]', 'V') IS NOT NULL
+    DROP VIEW CW1.[FavouriteActivitiesView];
 GO
 
-CREATE VIEW CW1.[Favourite_Activities] AS
+CREATE VIEW CW1.[FavouriteActivitiesView] AS
 SELECT u.UserNo, u.Username, fa.Activities
 FROM CW1.Users u
 JOIN CW1.FavouriteActivities fa ON u.UserNo = fa.UserNo
@@ -280,7 +280,7 @@ BEGIN
 END;
 GO
 
---DeleteUser Stored Procedure
+--DeleteUser Stored Procedure (for admin)
 
 CREATE PROCEDURE CW1.DeleteUser
     @UserNo INT
