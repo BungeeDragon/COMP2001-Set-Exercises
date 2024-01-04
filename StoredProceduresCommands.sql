@@ -43,9 +43,7 @@ EXEC CW1.UpdateUser
 
 
 
-/*EXEC CW1.InsertUser @Username = 'Alan Turing',
- @Email = 'alan@plymouth.ac.uk',
-  @Password = 'Enigma123!';*/
+EXEC CW1.InsertUser @Username = 'Alan Turing', @Email = 'alan@plymouth.ac.uk', @Password = 'Enigma123!';
 
 
 
