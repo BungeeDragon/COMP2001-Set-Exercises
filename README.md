@@ -1,2 +1,2 @@
 # COMP2001-Set-Exercises
-Version control for Azure Studio Database
+Version control for Azure Studio Databas
