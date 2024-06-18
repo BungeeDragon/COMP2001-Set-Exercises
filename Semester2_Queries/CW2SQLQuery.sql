@@ -20,6 +20,30 @@ BEGIN
     DROP TABLE CW2.Users; 
 END
 
+-- Drop the _EFMigrationsHistory table if it exists
+IF OBJECT_ID(N'dbo.__EFMigrationsHistory', N'U') IS NOT NULL 
+BEGIN
+    DROP TABLE dbo.__EFMigrationsHistory;
+END
+
+-- Drop the UsersData table if it exists
+IF OBJECT_ID(N'dbo.UserData', N'U') IS NOT NULL 
+BEGIN
+    DROP TABLE dbo.UserData; 
+END
+
+-- Drop the FavouriteActivities table if it exists
+IF OBJECT_ID(N'dbo.FavouriteActivities', N'U') IS NOT NULL 
+BEGIN
+    DROP TABLE dbo.FavouriteActivities; 
+END
+
+-- Drop the Users table if it exists
+IF OBJECT_ID(N'dbo.Users', N'U') IS NOT NULL 
+BEGIN
+    DROP TABLE dbo.Users; 
+END
+
 -- Create Users table
 CREATE TABLE CW2.Users
 (
@@ -36,11 +60,11 @@ SET IDENTITY_INSERT CW2.Users ON;
 
 -- Insert into Users table sample data
 INSERT INTO CW2.Users (UserNo, userStatus, Username, Email, userPassword)
-VALUES (1, 'Active', 'Grace Hopper', 'grace@plymouth.ac.uk', 'ISAD123!');
+VALUES (1, 'Admin', 'Grace Hopper', 'grace@plymouth.ac.uk', 'ISAD123!');
 INSERT INTO CW2.Users (UserNo, userStatus, Username, Email, userPassword)
-VALUES (2, 'Active', 'Tim Berners-Lee', 'tim@plymouth.ac.uk', 'COMP2000!');
+VALUES (2, 'Admin', 'Tim Berners-Lee', 'tim@plymouth.ac.uk', 'COMP2000!');
 INSERT INTO CW2.Users (UserNo, userStatus, Username, Email, userPassword)
-VALUES (3, 'Active', 'Ada Lovelace', 'ada@plymouth.ac.uk', 'insecurePassword');
+VALUES (3, 'Admin', 'Ada Lovelace', 'ada@plymouth.ac.uk', 'insecurePassword');
 
 -- Create UserData table
 CREATE TABLE CW2.UserData 
@@ -276,12 +300,12 @@ GO
 --DeleteUser Stored Procedure (for admin)
 
 CREATE PROCEDURE CW2.DeleteUser
-    @UserNo INT
+    @Email VARCHAR(320)-- Changed from @UserNo
 AS
 BEGIN
     UPDATE CW2.Users
     SET userStatus = 'Archived'
-    WHERE UserNo = @UserNo;
+    WHERE Email = @Email;
 END;
 GO
 
