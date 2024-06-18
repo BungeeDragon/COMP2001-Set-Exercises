@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Repos\COMP2001 Web Server</_PublishTargetUrl>
+    <History>True|2024-01-16T11:12:06.9634677Z;True|2024-01-16T11:05:44.3925102+00:00;</History>
+  </PropertyGroup>
+</Project>
